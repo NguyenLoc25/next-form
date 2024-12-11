@@ -9,6 +9,7 @@ export async function GET(request) {
     return NextResponse.json(collections);
 }
 
+// get data with filter
 export async function POST(request) {
     const body = await request.json();
 

@@ -1,26 +1,21 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const CollectionSchema = new mongoose.Schema(
-  {
+const CollectionSchema = new mongoose.Schema({
     label: {
-      type: String,
-      required: true,
-      default: "Untitled Collection",
+        type: String,
+        required: true,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     },
     questions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Question",
-      },
-    ],
-  },
-  { timestamps: true }
-);
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Question", // Reference the Question model
+        },
+      ],
+});
 
-export default mongoose.models.Collection ||
-  mongoose.model("Collection", CollectionSchema);
+export default mongoose.models.Collection || mongoose.model("Collection", CollectionSchema);
