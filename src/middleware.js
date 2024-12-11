@@ -13,6 +13,18 @@ export async function middleware(req) {
       return NextResponse.redirect(signInUrl);
     }
   }
+  // Add userID from token to the request headers
+//   console.log("token-middle");
+//   console.log(token);
+  const userId = token?._id;
+//   console.log(userId);
+  if(userId){
+    const modifiedRequest = NextResponse.next();
+
+    // Append userID to the headers
+    modifiedRequest.headers.set("user-id", userId);
+    return modifiedRequest;
+  }
 
   return NextResponse.next(); // Allow request to continue
 }

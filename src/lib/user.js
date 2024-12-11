@@ -1,16 +1,15 @@
 import User from "@/models/User";
-import dbConnect from "./mongodb";
 
+export const findOrCreateUser = async ({ email, name }) => {
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return existingUser;
 
-export async function findOrCreateUser({ email, name }) {
-  // Check if the user already exists in the database
-  await dbConnect();
-  const existingUser = await User.findOne({ email });
-  if (!existingUser) {
-    // Create a new user if not found
     const newUser = new User({ email, name });
     await newUser.save();
+    return newUser;
+  } catch (error) {
+    console.error("Lỗi khi tìm hoặc tạo người dùng:", error);
+    throw new Error("Lỗi khi xử lý người dùng.");
   }
-
-  return;
-}
+};
