@@ -1,0 +1,1 @@
+export const question_type = ["multiple_choice","checkbox","text"];

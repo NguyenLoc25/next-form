@@ -6,25 +6,20 @@ export async function middleware(req) {
   const protectedRoutes = ["/manage-form", "/account"]; // Add routes to protect
 
   if (protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
-    // If no token, redirect to the sign-in page
     if (!token) {
       const signInUrl = new URL("/api/auth/signin", req.url);
-      signInUrl.searchParams.set("callbackUrl", req.url); // Redirect back after login
+      signInUrl.searchParams.set("callbackUrl", req.url);
       return NextResponse.redirect(signInUrl);
     }
   }
-  // Add userID from token to the request headers
-//   console.log("token-middle");
-//   console.log(token);
-  const userId = token?._id;
-//   console.log(userId);
-  if(userId){
-    const modifiedRequest = NextResponse.next();
 
-    // Append userID to the headers
-    modifiedRequest.headers.set("user-id", userId);
-    return modifiedRequest;
+  const userId = token?._id;
+
+  if (!userId) {
+    console.error("User ID is missing in the token:", token);
   }
 
-  return NextResponse.next(); // Allow request to continue
+  const modifiedRequest = NextResponse.next();
+  modifiedRequest.headers.set("user-id", userId);
+  return modifiedRequest;
 }

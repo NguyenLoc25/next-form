@@ -33,20 +33,19 @@ export const authOptions = {
 
       return session;
     },
-    async jwt({ user, token, account }) {
-      if (account) {
-        token.accessToken = account.access_token;
-      }
-      if (user&&user._id) {
-        token._id = user._id.toString(); // Save the user's _id in the token
-      } else if (token?.email) {
-        // On subsequent sessions, fetch user info from the database using the email
-        await dbConnect();
-        const userData = await User.findOne({ email: token.email });
-        if (userData) {
-          token._id = userData._id.toString(); // Assign _id from the user in the database
+    async jwt({ token, user }) {
+      if (user) {
+        // Fetch the user from the database
+        const dbUser = await findOrCreateUser({ email: user.email, name: user.name });
+        token._id = dbUser._id.toString(); // Store _id in the token
+      } else if (!token._id && token.email) {
+        // Fetch _id for existing tokens
+        const dbUser = await User.findOne({ email: token.email });
+        if (dbUser) {
+          token._id = dbUser._id.toString();
         }
       }
+    
       return token;
     },
   },

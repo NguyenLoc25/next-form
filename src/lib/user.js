@@ -1,16 +1,19 @@
 import User from "@/models/User";
 import dbConnect from "./mongodb";
 
-
 export async function findOrCreateUser({ email, name }) {
-  // Check if the user already exists in the database
+  // Ensure a database connection
   await dbConnect();
-  const existingUser = await User.findOne({ email });
-  if (!existingUser) {
+
+  // Check if the user already exists in the database
+  let user = await User.findOne({ email });
+
+  if (!user) {
     // Create a new user if not found
-    const newUser = new User({ email, name });
-    await newUser.save();
+    user = new User({ email, name });
+    await user.save();
   }
 
-  return;
+  // Return the user object
+  return user;
 }
