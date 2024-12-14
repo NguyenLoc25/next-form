@@ -17,6 +17,8 @@ export async function middleware(req) {
 
   if (!userId) {
     console.error("User ID is missing in the token:", token);
+  }else{
+    console.log("User ID:", userId);
   }
 
   const modifiedRequest = NextResponse.next();

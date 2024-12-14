@@ -30,8 +30,19 @@ export default function CollectionEditor({id}){
         const fetchData = async () => {
             try {
               const response = await fetch(`/api/collection/${id}`);
+              console.log("Fetching collection data:", response); // Console log response
+
               if (!response.ok) {
-                throw new Error("Failed to fetch data");
+                // Kiểm tra phản hồi không phải là JSON
+                const contentType = response.headers.get("content-type");
+                console.log("Content-Type:", contentType);
+                if (!contentType || !contentType.includes("application/json")) {
+                  throw new Error(`Unexpected content type: ${contentType}`);
+                }
+            
+                const errorDetails = await response.json();  // Lỗi JSON
+                console.error("Error details:", errorDetails);  // Lỗi JSON
+                throw new Error(`Failed to update collection: ${errorDetails.message}`);
               }
               const {collection} = await response.json();
               setExistingData(collection);

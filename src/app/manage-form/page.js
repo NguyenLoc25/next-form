@@ -6,6 +6,8 @@ import CreateCollectionButton from "@/components/CreateCollectionButton";
 
 export default async function ManageFormPage() {
   const session = await getServerSession(authOptions);
+  let collectionsR = await fetch("http://localhost:3000/api/collection");
+  let collections = await collectionsR.json();
   return (
     <div className="py-10 w-full">
       <div className="flex w-full justify-between">
@@ -14,7 +16,25 @@ export default async function ManageFormPage() {
         </h1>
         <CreateCollectionButton />
       </div>
-      <div></div>
+      <div>
+        {
+          collections.map(({ _id, label, questions }) => (
+            <div key={_id} className="mb-6">
+              <h2 className="text-2xl font-bold">{label}</h2>
+              <ul className="ml-4 mt-2 list-disc">
+                {questions.map((questions) => (
+                  <li key={question._id}>
+                    <strong>Header:</strong> {question.question_header} <br />
+                    <strong>Type:</strong> {question.question_type} <br />
+                    <strong>Required:</strong> {question.question_required ? "Yes" : "No"} <br />
+                    <strong>Answers:</strong> {question.question_answer.join(", ")}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
     </div>
   );
 }
