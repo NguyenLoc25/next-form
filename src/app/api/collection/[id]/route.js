@@ -17,6 +17,7 @@ export async function GET(req, { params }) {
       .populate("user")
       .populate("questions");
     console.log("Fetched collection:", collection); // Log collection data
+    console.log("Questions:", collection.questions);
 
     return NextResponse.json({ success: true, collection });
   } catch (error) {
@@ -68,7 +69,8 @@ export async function PUT(req, { params }) {
       collection.label = label;
       await collection.save();
       console.log("Collection updated successfully:", collection); // Log updated collection
-
+      console.log("Questions:", collection.questions);
+      console.log("Questions IDs:", collection.questions.map(q => q._id));
       return NextResponse.json({ success: true, collection: collection });
     } else {
       console.log("Missing user ID in headers");

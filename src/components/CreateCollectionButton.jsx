@@ -27,7 +27,7 @@ const CreateCollectionButton = ({ userId }) => {
 
   return (
     <Button onClick={handleCreate}>
-      <Plus /> Creat new collection
+      <Plus /> Create new collection
     </Button>
   );
 };

@@ -1,3 +1,5 @@
 .question-field {
     @apply border-slate-300 rounded-md border-2 p-2;
+    // Kiểm tra z-index nếu cần
+    z-index: 10;
 }
