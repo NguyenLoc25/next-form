@@ -59,21 +59,31 @@ export default function CollectionEditor({id}) {
         fetchData();
     }, [id, form.setValue, append]);
 
-    const onSubmit = async (data) => {
-        const response = await fetch(`/api/collection/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        });
-
-        if (response.ok) {
-            // Redirect to collections list after saving
-        } else {
-            console.error("Failed to update collection");
+    async function onSubmit(data) {
+        try {
+            const response = await fetch(`/api/collection/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+    
+            if (!response.ok) {
+                const errorDetails = await response.json();
+                console.error("Failed to update collection", errorDetails);  // Log detailed error
+                return { success: false, error: errorDetails.message };
+            }
+    
+            console.log("Collection updated successfully!");
+            // Redirect to collections list or other successful flow
+    
+        } catch (err) {
+            console.error("Error updating collection:", err);
+            return { success: false, error: err.message };
         }
-    };
+    }
+    
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -105,7 +115,7 @@ export default function CollectionEditor({id}) {
                     <div className="flex flex-col w-full gap-5">
                         <div className="flex justify-between">
                             <label>Questions</label>
-                            <Button type="button" onClick={() => append({ question_header: "new question", question_type: 0, question_required: false, question_answer: [] })}>
+                            <Button type="button" onClick={() => append({ question_header: "new question", question_type: 0, question_required: false })}>
                                 <Plus /> New
                             </Button>
                         </div>

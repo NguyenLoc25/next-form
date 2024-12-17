@@ -8,11 +8,13 @@ export async function POST(req) {
   try {
     const userId = checkAuth(req);
     if (userId){
-      const { label = "Untitled Collection" } = await req.json();
+      const { label = "Untitled Collection", question_answer = [] } = await req.json(); // Handle JSON data
 
       const newCollection = await Collection.create({
         label,
         user: userId,
+        questions: question_answer.map(answer => ({ answer })), // Ensure valid format
+      
       });
 
       return NextResponse.json({

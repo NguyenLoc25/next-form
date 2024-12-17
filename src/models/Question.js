@@ -21,10 +21,10 @@ const QuestionSchema = new mongoose.Schema({
       type: Boolean,
       default: false, // Set default value
     },
-    question_answer: [{
-      type: String,
-      unique: true, // Ensure unique answers
-    }],
+    // question_answer: [{
+    //   type: String,
+    //   unique: true, // Ensure unique answers
+    // }],
   });
   
   export default mongoose.models.Question || mongoose.model("Question", QuestionSchema);

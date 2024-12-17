@@ -7,7 +7,7 @@ const questionSchema = z.object({
   question_header: z.string().nonempty("Question header is required"),
   question_type: questionTypeEnum,
   question_required: z.boolean().optional(),
-  question_answer: z.array(z.string()).optional(),
+  // question_answer: z.array(z.string()).optional(),
 });
 
 const schema = z.object({

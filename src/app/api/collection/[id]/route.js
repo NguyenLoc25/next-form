@@ -4,15 +4,14 @@ import Question from "@/models/Question";
 import dbConnect from "@/lib/mongodb";
 import { checkAuth } from "@/lib/utils_server";
 
-// GET: Fetch a specific collection by ID
 export async function GET(req, { params }) {
-  const { id } = await params;
-  console.log("Fetching collection with ID:", id); // Log ID
-  
-  await dbConnect();
-  console.log("Database connected successfully");
-
   try {
+    const { id } = await params; // Awaiting the result of params
+    console.log("Fetching collection with ID:", id); // Log ID
+    
+    await dbConnect();
+    console.log("Database connected successfully");
+
     const collection = await Collection.findById(id)
       .populate("user")
       .populate("questions");
@@ -29,58 +28,79 @@ export async function GET(req, { params }) {
   }
 }
 
-// PUT: Update a collection by ID
+
+
 export async function PUT(req, { params }) {
-  const { id } = await params;
-  console.log("Updating collection with ID:", id); // Log ID
-  
+  try {
+  const { id } = params;
+  console.log("Updating collection with ID:", id);
+
   await dbConnect();
   console.log("Database connected successfully");
 
-  try {
     const userId = checkAuth(req);
-    console.log("Authenticated user ID:", userId); // Log user ID
-
-    if (userId) {
-      const { label } = await req.json();
-      console.log("Received new label:", label); // Log new label
-
-      const collection = await Collection.findById(id);
-      console.log("Fetched collection for update:", collection); // Log collection data
-
-      if (!collection) {
-        console.log("Collection not found for ID:", id);
-        return NextResponse.json(
-          { success: false, message: "Collection not found" },
-          { status: 404 }
-        );
-      }
-      if (collection.user.toString() !== userId) {
-        console.log("Permission denied for user ID:", userId);
-        return NextResponse.json(
-          {
-            success: false,
-            message: "You do not have permission to update this collection",
-          },
-          { status: 403 }
-        );
-      }
-      // Update the collection
-      collection.label = label;
-      await collection.save();
-      console.log("Collection updated successfully:", collection); // Log updated collection
-      console.log("Questions:", collection.questions);
-      console.log("Questions IDs:", collection.questions.map(q => q._id));
-      return NextResponse.json({ success: true, collection: collection });
-    } else {
-      console.log("Missing user ID in headers");
+    if (!userId) {
       return NextResponse.json(
-        { success: false, message: "UserID is missing in headers" },
+        { success: false, message: "User ID is missing" },
         { status: 400 }
       );
     }
+
+    const { label, questions } = await req.json();
+    console.log("Received data:", { label, questions });
+
+    const collection = await Collection.findById(id);
+    if (!collection) {
+      return NextResponse.json(
+        { success: false, message: "Collection not found" },
+        { status: 404 }
+      );
+    }
+
+    if (collection.user.toString() !== userId) {
+      return NextResponse.json(
+        { success: false, message: "Permission denied" },
+        { status: 403 }
+      );
+    }
+
+    // Cập nhật label
+    collection.label = label || collection.label;
+
+    // Xử lý câu hỏi (questions)
+    const validQuestions = [];
+    if (Array.isArray(questions)) {
+      for (const question of questions) {
+        if (question._id && mongoose.Types.ObjectId.isValid(question._id)) {
+          // Cập nhật câu hỏi đã tồn tại
+          const existingQuestion = await Question.findByIdAndUpdate(
+            question._id,
+            { ...question, collection_id: id },
+            { new: true, upsert: true } // Tự động tạo mới nếu không tìm thấy
+          );
+          validQuestions.push(existingQuestion._id);
+        } else {
+          // Tạo câu hỏi mới
+          const newQuestion = await Question.create({
+            ...question,
+            collection_id: id,
+          });
+          validQuestions.push(newQuestion._id);
+        }
+      }
+    }
+    
+
+    // Gán danh sách câu hỏi mới
+    collection.questions = validQuestions;
+
+    // Lưu Collection
+    await collection.save();
+    console.log("Collection updated successfully:", collection);
+
+    return NextResponse.json({ success: true, collection });
   } catch (error) {
-    console.error("Error updating collection:", error.message); // Log error
+    console.error("Error updating collection:", error.message);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 400 }
